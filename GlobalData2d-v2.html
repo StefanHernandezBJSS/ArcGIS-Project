@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Intro to CSVLayer | Sample | ArcGIS API for JavaScript 4.18</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        background-color: aliceblue;
+      }
+      #viewDiv canvas{
+        filter: drop-shadow(16px 16px 10px rgba(0,0,0, 0.5));
+      }
+
+      .esri-legend {
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.18/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.18/"></script>
+
+    <script>
+      require(["esri/Map","esri/WebScene", "esri/layers/CSVLayer", "esri/views/MapView"], function(ArcGISMap,
+        WebScene,
+        CSVLayer,
+        MapView
+      ) {
+        // If CSV files are not on the same domain as your website, a CORS enabled server
+        // or a proxy is required.
+        const url = "https://raw.githubusercontent.com/StefanHernandezBJSS/ArcGIS-Project/main/GlobalCoronaVirus.csv";
+
+        // Paste the url into a browser's address bar to download and view the attributes
+        // in the CSV file. These attributes include:
+        // * mag - magnitude
+        // * type - earthquake or other event such as nuclear test
+        // * place - location of the event
+        // * time - the time of the event
+
+        const template = {
+          title: "CoronaVirus Info",
+          content: [{
+              type: "fields",
+              fieldInfos: [
+                {
+                  fieldName: "Combined_Key",
+                  label: "Location",
+                  visible: true
+                },
+                                {
+                  fieldName: "Confirmed",
+                  label: "Cases",
+                  visible: true
+                },
+                                {
+                  fieldName: "Deaths",
+                  label: "Deaths",
+                  visible: true
+                },
+                                                {
+                  fieldName: "Incident_Rate",
+                  label: "Exposure Rate",
+                  visible: true
+                },
+                                                {
+                  fieldName: "Case_Fatality_Ratio",
+                  label: "Death Rate",
+                  visible: true
+                },
+                                                {
+                  fieldName: "Last_Update",
+                  label: "Last Updated",
+                  visible: true
+                },
+                
+              ]
+            }] 
+        };
+
+        const csvLayer = new CSVLayer({
+          url: url,
+          copyright: "USGS Earthquakes",
+          popupTemplate: template
+        });
+
+var renderer = {
+  type: "simple", // autocasts as new SimpleRenderer()
+  symbol: {
+    // symbol type required for rendering point geometries
+    type: "simple-marker", // autocasts as new PointSymbol3D()
+    symbolLayers: [
+      {
+        // renders points as volumetric objects
+        type: "object", // autocasts as new ObjectSymbol3DLayer()
+        resource: { primitive: "cone" }, // renders points as cones
+        width: 50000
+      }
+    ]
+  },
+  visualVariables: [
+    {
+      type: "color",
+      field: "Deaths", // field containing data for atmospheric pressure
+      stops: [{ value: 0, color: "blue" }, { value: 10000, color: "red" }]
+    },
+    {
+      type: "size",
+      field: "Confirmed", // field containing data for wind speed
+      stops: [{ value: 0, size: 1 }, { value: 182000, size: 10 }],
+      axis: "height"
+    },
+    {
+      type: "size",
+      axis: "width-and-depth",
+      useSymbolValue: true // uses the width value defined in the symbol layer (50,000)
+    }
+  ]
+};        csvLayer.renderer = renderer;
+
+        const map = new ArcGISMap({
+          basemap: "streets-navigation-vector",
+          ground: "world-elevation"
+        });
+
+        map.add(csvLayer);
+
+        const view = new MapView({
+          container: "viewDiv",
+          center: [-83.5742, 35.05197],
+          zoom: 5,
+          qualityProfile: "high",
+          map: map,
+          alphaCompositingEnabled: true,
+          highlightOptions: {
+            fillOpacity: 0,
+            color: "#ffffff"
+          },
+          constraints: {
+            altitude: {
+              min: 7000
+            }
+          }
+        });
+        view.environment.background = {
+          type: "color",
+          color: [0, 0, 0, 0]
+        };
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
