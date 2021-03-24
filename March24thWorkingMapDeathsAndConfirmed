@@ -151,8 +151,8 @@ var renderer = {
         view: view,
         mode: "instant",
          fullTimeExtent: { // entire extent of the timeSlider
-          start: new Date(2020, 5, 2),
-          end: new Date(2021, 1, 2)
+          start: new Date(2020, 5, 1),
+          end: new Date(2021, 1, 1)
          },  
          stops: {
                 interval: {
